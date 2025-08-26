@@ -11,5 +11,5 @@ async def read_root():
 
 
 @app.post("/polls/create")
-def create_poll():
-    return Poll(options=["yes", "no", "maybe"])
+def create_poll(poll: Poll) -> Poll:
+    return Poll(title="some placeholder tile", options=["yes", "no", "maybe"])
