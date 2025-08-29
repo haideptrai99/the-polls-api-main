@@ -18,7 +18,7 @@ def create_poll(poll: PollCreate) -> dict[str, Any]:
 
 
 # @app.get("/polls/{poll_id}", response_model=Poll)
-@router.post("/{poll_id}")
+@router.get("/{poll_id}")
 def get_poll(poll_id: UUID) -> Poll:
     poll = utils.get_poll(poll_id)
     if not poll:
