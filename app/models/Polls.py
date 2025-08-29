@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException
@@ -12,12 +11,12 @@ class PollCreate(BaseModel):
     """Poll write data model"""
 
     title: str = Field(min_length=5, max_length=50)
-    options: List[str]
-    expires_at: Optional[datetime] = None
+    options: list[str]
+    expires_at: datetime | None = None
 
     @field_validator("options")
     @classmethod
-    def validate_options(cls, v: List[str]) -> List[str]:
+    def validate_options(cls, v: list[str]) -> list[str]:
         if len(v) < 2 or len(v) > 5:
             # raise ValueError("A poll must contain between 2 and 5 choices")
             raise HTTPException(
@@ -37,7 +36,7 @@ class PollCreate(BaseModel):
             for index, desc in enumerate(self.options)
         ]
 
-        if self.expires_at is not None and self.expires_at < datetime.now(timezone.utc):
+        if self.expires_at is not None and self.expires_at < datetime.now(UTC):
             # raise ValueError("A poll's expiration must be in the future")
             raise HTTPException(
                 status_code=400, detail="A poll's expiration must be in the future"
@@ -50,5 +49,5 @@ class Poll(PollCreate):
     """Poll read data model, with uuid and creation date"""
 
     id: UUID = Field(default_factory=uuid4)
-    options: List[Choice]
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    options: list[Choice]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
