@@ -1,0 +1,89 @@
+# pyproject.toml
+
+[project]
+name = "my-fastapi-project"
+version = "0.1.0"
+description = "A modern and robust FastAPI project setup." # [MỚI]
+authors = [                                                # [MỚI]
+    { name = "hai thai", email = "thaiviethai99@gmail.com" },
+]
+readme = "README.md"                                       # [MỚI]
+license = { text = "MIT" }                                   # [MỚI]
+requires-python = ">=3.12"                                   # [MỚI]
+
+# [MỚI] Dependencies chính cho ứng dụng chạy
+dependencies = [
+    "fastapi>=0.112.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.8.0",
+]
+
+[project.optional-dependencies]
+# [SỬA] Dependencies chỉ dùng cho môi trường phát triển
+dev = [
+    "ruff",
+    "mypy",
+    "pytest>=8.4.0",           # [MỚI] Thư viện testing
+    "httpx>=0.27.0",           # [MỚI] HTTP client cho testing
+]
+
+# [MỚI] URLs hữu ích cho dự án
+#[project.urls]
+#Homepage = "https://github.com/your-username/my-fastapi-project"
+#Repository = "https://github.com/your-username/my-fastapi-project"
+
+# -------------------------------------------------------------------
+# [1] Cấu hình Mypy (Type Checker)
+# -------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = false
+warn_redundant_casts = true
+check_untyped_defs = true
+
+# -------------------------------------------------------------------
+# [2] Cấu hình cho plugin pydantic-mypy
+# -------------------------------------------------------------------
+[tool.pydantic-mypy]
+init_typed = true
+init_forbid_extra = true
+warn_required_dynamic_aliases = true
+
+# -------------------------------------------------------------------
+# [3] Cấu hình Ruff (Linter + Formatter)
+# -------------------------------------------------------------------
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+# -------------------------------------------------------------------
+# [3.1] Cấu hình Linter
+# -------------------------------------------------------------------
+[tool.ruff.lint]
+# [SỬA] Thêm các bộ quy tắc: FA (FastAPI), S (Security/Bandit), TID (Pytest), ARG (Unused Arguments)
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "PYI", "A", "C4", "T20", "FA", "S", "TID", "ARG"]
+ignore = [
+    "E501",  # Line too long, handled by formatter
+    "B008",  # Function call in default argument (common in FastAPI Depends)
+    "S101",  # `assert` used (ok in tests)
+]
+
+# [SỬA] Đưa ignore cho test vào đây cho gọn
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["T20"] # Vẫn cho phép print trong tests, nhưng S101 đã ignore ở trên
+
+# [MỚI] Cấu hình sắp xếp import (isort)
+[tool.ruff.lint.isort]
+known-first-party = ["my_fastapi_project"] # Thay "my_fastapi_project" bằng tên package của bạn
+
+# -------------------------------------------------------------------
+# [3.2] Cấu hình Formatter
+# -------------------------------------------------------------------
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+docstring-code-line-length = 72

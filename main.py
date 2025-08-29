@@ -1,31 +1,62 @@
+from typing import Any
+
 from fastapi import FastAPI
+from pydantic import BaseModel
+from upstash_redis import Redis
 
 from app.models.Polls import PollCreate
+from config import get_settings
 
 app = FastAPI()
 
 
-@app.get("/")
-async def read_root():
-    return {"message": "Hello, World!"}
+class Message(BaseModel):
+    message: str
+
+
+@app.get(
+    "/",
+    response_model=Message,
+    summary="summary hello world",
+    description="mô tả hàm",
+)
+def read_root() -> Message:
+    return Message(message="Hello, World!")
 
 
 @app.post("/polls/create")
-def create_poll(poll: PollCreate):
+def create_poll(poll: PollCreate) -> dict[str, Any]:
     new_poll = poll.create_poll()
     return {"detail": "Poll sucesss created", "poll_id": new_poll.id, "poll": new_poll}
 
 
-# choice_data = Choice(description="hehe", label=1)
+class RedisResponse(BaseModel):
+    id: str
+    name: str | None = None
 
-# Objective:
-# -- split the Poll model into
-# 1. PollCreate: the write model:
-#     * title (required)
-#     * options (list of strings)
-#     * expires_at (optional datetime)
-#
-# 2. Poll: the read model
-#     * id (uuid with default factory)
-#     * options (list of Choice)
-#     * created_at (optional datetime)
+
+settings = get_settings()
+if settings.UPSTASH_REDIS_URL is None or settings.UPSTASH_REDIS_TOKEN is None:
+    raise RuntimeError(
+        "UPSTASH_REDIS_URL and UPSTASH_REDIS_TOKEN must be set in .env or environment"
+    )
+
+redis_client = Redis(url=settings.UPSTASH_REDIS_URL, token=settings.UPSTASH_REDIS_TOKEN)
+
+
+@app.get("/redis/get/{redis_id}", tags=["throwaway"], response_model=RedisResponse)
+def get_redis(redis_id: str) -> RedisResponse:
+    value = redis_client.get(redis_id)
+    if isinstance(value, bytes):
+        value = value.decode()
+    return RedisResponse(id=redis_id, name=value)
+
+
+class SaveResponse(BaseModel):
+    status: str
+
+
+@app.post("/redis/save", tags=["throwaway"], response_model=SaveResponse)
+def save_redis(redis_id: str, name: str) -> SaveResponse:
+    redis_client.set(redis_id, name)
+    return SaveResponse(status="success")
