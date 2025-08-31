@@ -17,6 +17,8 @@ def vote_by_id(poll_id: UUID, vote: VoteById) -> dict[str, Any]:
         voter=Voter(**vote.voter.model_dump()),
     )
 
+    utils.save_vote(poll_id, vote=vote_model)
+
     return {"message": "Vote recorded", "vote": vote_model}
 
 
@@ -32,5 +34,7 @@ def vote_by_label(poll_id: UUID, vote: VoteByLabel) -> dict[str, Any]:
         choice_id=choice_id,
         voter=Voter(**vote.voter.model_dump()),
     )
+
+    utils.save_vote(poll_id, vote=vote_model)
 
     return {"message": "Vote recorded", "vote": vote_model}
