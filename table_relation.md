@@ -53,7 +53,11 @@ Create code
         ]
 ```
 
-## 1.4 Code demo poll
+## 1.4 Greate poll
+Save with key 
+```python
+poll:{poll_id}
+```
 Create poll:
 ```json
 {
@@ -131,8 +135,8 @@ voter chi có email và voted_at-ngày bình chọn
 * voter: VoterCreate-require
 
 
-## 2.3 Code demo
-### 2.3.1 Create vote by id
+## 2.4 Code demo
+### 2.4.1 Create vote by id
 input data
 ```json
 {
@@ -157,7 +161,7 @@ response:
     }
 }
 ```
-### 2.3.2 Create vote by label
+### 2.4.2 Create vote by label
 input data
 ```json
 {
@@ -182,3 +186,39 @@ response:
     }
 }
 ```
+## 2.5 save vote use hash stored redis
+Save with key 
+```python
+votes:{poll_id}
+```
+
+### 2.5.1 save vote with
+poll_id,email,vote_json_data
+
+```python
+def save_vote(poll_id: UUID, vote: Vote) -> None:
+    vote_json = vote.model_dump_json()
+    redis_client.hset(f"votes:{poll_id}", vote.voter.email, vote_json)
+```
+### 2.5.2 get vote with
+poll_id,email
+
+```python
+def get_vote(poll_id: UUID, email: str) -> Vote | None:
+    vote_json = redis_client.hget(f"votes:{poll_id}", email)
+
+    if vote_json:
+        return Vote.model_validate_json(vote_json)
+
+    return None
+```
+
+### 2.5.3 Check create vote trùng nhau with
+poll_id,email
+
+```python
+if utils.get_vote(poll_id, vote.voter.email):
+        raise HTTPException(status_code=400, detail="Already voted")
+```
+
+

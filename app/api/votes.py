@@ -11,6 +11,9 @@ router = APIRouter()
 
 @router.post("/{poll_id}/id")
 def vote_by_id(poll_id: UUID, vote: VoteById) -> dict[str, Any]:
+    if utils.get_vote(poll_id, vote.voter.email):
+        raise HTTPException(status_code=400, detail="Already voted")
+
     vote_model = Vote(
         poll_id=poll_id,
         choice_id=vote.choice_id,
@@ -25,6 +28,9 @@ def vote_by_id(poll_id: UUID, vote: VoteById) -> dict[str, Any]:
 @router.post("/{poll_id}/label")
 def vote_by_label(poll_id: UUID, vote: VoteByLabel) -> dict[str, Any]:
     choice_id = utils.get_choice_id_by_label(poll_id, vote.choice_label)
+
+    if utils.get_vote(poll_id, vote.voter.email):
+        raise HTTPException(status_code=400, detail="Already voted")
 
     if not choice_id:
         raise HTTPException(status_code=400, detail="Invalid choice label provided.")
