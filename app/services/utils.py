@@ -3,6 +3,7 @@ from uuid import UUID
 from upstash_redis import Redis
 
 from app.models.Polls import Poll
+from app.models.Votes import Vote
 from config import get_settings
 
 settings = get_settings()
@@ -34,3 +35,17 @@ def get_choice_id_by_label(poll_id: UUID, label: int) -> UUID | None:
         if choice.label == label:
             return choice.id
     return None
+
+
+def get_vote(poll_id: UUID, email: str) -> Vote | None:
+    vote_json = redis_client.hget(f"votes:{poll_id}", email)
+
+    if vote_json:
+        return Vote.model_validate_json(vote_json)
+
+    return None
+
+
+def save_vote(poll_id: UUID, vote: Vote) -> None:
+    vote_json = vote.model_dump_json()
+    redis_client.hset(f"votes:{poll_id}", vote.voter.email, vote_json)
