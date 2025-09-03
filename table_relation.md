@@ -54,7 +54,7 @@ Create code
 ```
 
 ## 1.4 Greate poll
-Save with key 
+### Save with key 
 ```python
 poll:{poll_id}
 ```
@@ -105,9 +105,10 @@ response:
 
 # 2.Voter
 ## 2.1 Mối quan hệ
-1 người có thể vote cho nhiều poll  
-1 voter-> n poll
-voter chi có email và voted_at-ngày bình chọn
+* 1 người có thể vote cho nhiều poll
+* 1 voter-> n poll
+* voter chi có email và voted_at-ngày bình chọn
+
 ## 2.2 Table
 ### 2.2.1 VoterCreate
 * email: EmailStr->require
@@ -187,7 +188,7 @@ response:
 }
 ```
 ## 2.5 save vote use hash stored redis
-Save with key 
+### Save with key 
 ```python
 votes:{poll_id}
 ```
