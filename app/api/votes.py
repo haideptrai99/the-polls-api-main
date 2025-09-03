@@ -22,6 +22,9 @@ def vote_by_id(poll_id: UUID, vote: VoteById) -> dict[str, Any]:
     if utils.get_vote(poll_id, vote.voter.email):
         raise HTTPException(status_code=400, detail="Already voted")
 
+    if vote.choice_id not in [choice.id for choice in poll.options]:
+        raise HTTPException(status_code=400, detail="Invalid choice id specified")
+
     vote_model = Vote(
         poll_id=poll_id,
         choice_id=vote.choice_id,
