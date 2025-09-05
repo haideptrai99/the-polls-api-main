@@ -54,3 +54,11 @@ def get_polls(status: PollStatus = PollStatus.ACTIVE) -> PollsListResponse:
         filtered_polls = polls
 
     return PollsListResponse(count=len(filtered_polls), polls=filtered_polls)
+
+
+@router.get("/{poll_id}/results")
+def get_results(poll_id: UUID) -> dict[str, dict[UUID, int]]:
+    results = utils.get_vote_count(poll_id)
+    return {"results": results}
+
+    # return utils.get_poll_results(poll_id)

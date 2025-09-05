@@ -54,6 +54,13 @@ def get_vote(poll_id: UUID, email: str) -> Vote | None:
 def save_vote(poll_id: UUID, vote: Vote) -> None:
     vote_json = vote.model_dump_json()
     redis_client.hset(f"votes:{poll_id}", vote.voter.email, vote_json)
+    redis_client.hincrby(f"votes_count:{poll_id}", str(vote.choice_id), 1)
+
+
+def get_vote_count(poll_id: UUID) -> dict[UUID, int]:
+    vote_counts = redis_client.hgetall(f"votes_count:{poll_id}")
+
+    return {UUID(choice_id): int(count) for choice_id, count in vote_counts.items()}
 
 
 def get_all_polls_old() -> list[Poll]:

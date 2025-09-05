@@ -102,6 +102,50 @@ response:
     }
 }
 ```
+## 1.5 get all polls by status
+default:ACTIVE
+```python
+class PollStatus(Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    ALL = "all"
+```
+
+```python
+{
+    "count": 1,
+    "polls": [
+        {
+            "title": "test expire polls",
+            "options": [
+                {
+                    "description": "yes",
+                    "id": "1c4dd291-4ab7-4291-ac34-53c427b667a2",
+                    "label": 1
+                },
+                {
+                    "description": "no",
+                    "id": "7c4dae77-613e-430f-91ea-c5dc17aff56b",
+                    "label": 2
+                },
+                {
+                    "description": "abstain",
+                    "id": "7af91a06-79b3-434d-9a8e-cb95df9c9a14",
+                    "label": 3
+                }
+            ],
+            "expires_at": "05-09-2025 16:23:00",
+            "id": "04be5355-795a-4efa-a80b-373cd0cdaf7c",
+            "created_at": "2025-09-05T09:21:39.056996Z",
+            "full_name": "fullname:haideptrai"
+        }
+    ]
+}
+```
+
+## 1.6 get_choice_id_by_label
+poll_id:UUID-require  
+label:int-require
 
 # 2.Voter
 ## 2.1 Mối quan hệ
@@ -221,5 +265,25 @@ poll_id,email
 if utils.get_vote(poll_id, vote.voter.email):
         raise HTTPException(status_code=400, detail="Already voted")
 ```
+
+## 2.6 Vote count
+### 2.6.1 Save with key
+poll_id:UUID-require  
+vote: Vote
+```python
+votes_count:{poll_id}
+```
+### 2.6.2 Get Vote count
+poll_id:UUID-require  
+
+```json
+{
+    "results": {
+        "218c8823-c033-44ab-b9e9-aba94776b0db": 2,
+        "e023aa5a-ae44-4a80-a512-da164572cfc3": 2
+    }
+}
+```
+
 
 
