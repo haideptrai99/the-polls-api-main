@@ -56,7 +56,7 @@ def save_vote(poll_id: UUID, vote: Vote) -> None:
     redis_client.hset(f"votes:{poll_id}", vote.voter.email, vote_json)
 
 
-def get_all_polls() -> list[Poll]:
+def get_all_polls_old() -> list[Poll]:
     poll_keys = redis_client.keys("poll:*")
 
     polls = []
@@ -65,5 +65,23 @@ def get_all_polls() -> list[Poll]:
         poll_json = redis_client.get(key)
         if poll_json:
             polls.append(Poll.model_validate_json(poll_json))
+
+    return polls
+
+
+def get_all_polls() -> list[Poll]:
+    poll_keys = redis_client.keys("poll:*")
+
+    # polls = []
+
+    # for key in poll_keys:
+    #     poll_json = redis_client.get(key)
+    #     if poll_json:
+    #         polls.append(Poll.model_validate_json(poll_json))
+
+    poll_jsons = redis_client.mget(*poll_keys)
+    # redis_client.mget(poll_id_1, poll_id_2, poll_id_3, ...)
+
+    polls = [Poll.model_validate_json(pj) for pj in poll_jsons if pj]
 
     return polls
