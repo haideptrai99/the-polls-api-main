@@ -24,3 +24,13 @@ def get_poll(poll_id: UUID) -> Poll:
     if not poll:
         raise HTTPException(status_code=400, detail="A poll id not correct")
     return poll
+
+
+@router.get("/")
+def get_polls() -> list[Poll]:
+    polls = utils.get_all_polls()
+
+    if not polls:
+        raise HTTPException(status_code=404, detail="No polls were found")
+
+    return polls
