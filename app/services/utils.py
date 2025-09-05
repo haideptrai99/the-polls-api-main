@@ -100,3 +100,13 @@ def get_poll_results(poll_id: UUID) -> PollResults | None:
     return PollResults(
         id=poll.id, title=poll.title, total_votes=total_votes, results=results
     )
+
+
+def delete_poll(poll_id: UUID) -> None:
+    # redis_client(f"poll:{poll_id}")
+    # redis_client(f"votes:{poll_id}")
+    # redis_client(f"votes_count:{poll_id}")
+
+    keys_to_delete = [f"poll:{poll_id}", f"votes:{poll_id}", f"votes_count:{poll_id}"]
+
+    redis_client.delete(*keys_to_delete)
