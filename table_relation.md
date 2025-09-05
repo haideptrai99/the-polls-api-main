@@ -275,7 +275,7 @@ votes_count:{poll_id}
 ```
 ### 2.6.2 Get Vote count
 poll_id:UUID-require  
-
+format old
 ```json
 {
     "results": {
@@ -284,6 +284,29 @@ poll_id:UUID-require
     }
 }
 ```
+format new:
+```python
+{
+    "id": "fcbdbfcb-9193-4f69-bd56-cbe3f080f748",
+    "title": "test count vote poll",
+    "total_votes": 4,
+    "results": [
+        {
+            "description": "yes",
+            "vote_count": 2
+        },
+        {
+            "description": "no",
+            "vote_count": 2
+        },
+        {
+            "description": "abstain",
+            "vote_count": 0
+        }
+    ]
+}
+```
+
 
 
 

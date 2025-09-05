@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.models.Polls import Poll, PollCreate
+from app.models.Results import PollResults
 from app.services import utils
 
 router = APIRouter()
@@ -57,8 +58,8 @@ def get_polls(status: PollStatus = PollStatus.ACTIVE) -> PollsListResponse:
 
 
 @router.get("/{poll_id}/results")
-def get_results(poll_id: UUID) -> dict[str, dict[UUID, int]]:
-    results = utils.get_vote_count(poll_id)
-    return {"results": results}
+def get_results(poll_id: UUID) -> PollResults | None:
+    # results = utils.get_vote_count(poll_id)
+    # return {"results": results}
 
-    # return utils.get_poll_results(poll_id)
+    return utils.get_poll_results(poll_id)

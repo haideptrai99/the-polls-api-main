@@ -3,6 +3,7 @@ from uuid import UUID
 from upstash_redis import Redis
 
 from app.models.Polls import Poll
+from app.models.Results import PollResults, Result
 from app.models.Votes import Vote
 from config import get_settings
 
@@ -13,6 +14,24 @@ if settings.UPSTASH_REDIS_URL is None or settings.UPSTASH_REDIS_TOKEN is None:
     )
 
 redis_client = Redis(url=settings.UPSTASH_REDIS_URL, token=settings.UPSTASH_REDIS_TOKEN)
+
+
+def get_all_polls() -> list[Poll]:
+    poll_keys = redis_client.keys("poll:*")
+
+    # polls = []
+
+    # for key in poll_keys:
+    #     poll_json = redis_client.get(key)
+    #     if poll_json:
+    #         polls.append(Poll.model_validate_json(poll_json))
+
+    poll_jsons = redis_client.mget(*poll_keys)
+    # redis_client.mget(poll_id_1, poll_id_2, poll_id_3, ...)
+
+    polls = [Poll.model_validate_json(pj) for pj in poll_jsons if pj]
+
+    return polls
 
 
 def save_poll(poll: Poll) -> None:
@@ -63,32 +82,21 @@ def get_vote_count(poll_id: UUID) -> dict[UUID, int]:
     return {UUID(choice_id): int(count) for choice_id, count in vote_counts.items()}
 
 
-def get_all_polls_old() -> list[Poll]:
-    poll_keys = redis_client.keys("poll:*")
+def get_poll_results(poll_id: UUID) -> PollResults | None:
+    poll = get_poll(poll_id)
+    if not poll:
+        return None
 
-    polls = []
+    vote_counts = get_vote_count(poll_id)
+    total_votes = sum(vote_counts.values())
 
-    for key in poll_keys:
-        poll_json = redis_client.get(key)
-        if poll_json:
-            polls.append(Poll.model_validate_json(poll_json))
+    results = [
+        Result(description=choice.description, vote_count=vote_counts.get(choice.id, 0))
+        for choice in poll.options
+    ]
 
-    return polls
+    results = sorted(results, key=lambda x: x.vote_count, reverse=True)
 
-
-def get_all_polls() -> list[Poll]:
-    poll_keys = redis_client.keys("poll:*")
-
-    # polls = []
-
-    # for key in poll_keys:
-    #     poll_json = redis_client.get(key)
-    #     if poll_json:
-    #         polls.append(Poll.model_validate_json(poll_json))
-
-    poll_jsons = redis_client.mget(*poll_keys)
-    # redis_client.mget(poll_id_1, poll_id_2, poll_id_3, ...)
-
-    polls = [Poll.model_validate_json(pj) for pj in poll_jsons if pj]
-
-    return polls
+    return PollResults(
+        id=poll.id, title=poll.title, total_votes=total_votes, results=results
+    )
