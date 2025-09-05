@@ -31,9 +31,14 @@ def get_choice_id_by_label(poll_id: UUID, label: int) -> UUID | None:
     poll = get_poll(poll_id)
     if not poll:
         return None
+    return get_choice_id_by_label_given(poll, label)
+
+
+def get_choice_id_by_label_given(poll: Poll, label: int) -> UUID | None:
     for choice in poll.options:
         if choice.label == label:
             return choice.id
+
     return None
 
 

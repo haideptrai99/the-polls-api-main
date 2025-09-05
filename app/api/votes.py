@@ -49,7 +49,8 @@ def vote_by_label(poll_id: UUID, vote: VoteByLabel) -> dict[str, Any]:
     if utils.get_vote(poll_id, vote.voter.email):
         raise HTTPException(status_code=400, detail="Already voted")
 
-    choice_id = utils.get_choice_id_by_label(poll_id, vote.choice_label)
+    # choice_id = utils.get_choice_id_by_label(poll_id, vote.choice_label)
+    choice_id = utils.get_choice_id_by_label_given(poll, vote.choice_label)
 
     if not choice_id:
         raise HTTPException(status_code=400, detail="Invalid choice label provided.")

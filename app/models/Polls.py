@@ -48,11 +48,36 @@ class PollCreate(BaseModel):
     def full_name(self) -> str:
         return "fullname:haideptrai"
 
+    # @field_serializer("expires_at")
+    # def serialize_expires_at(
+    #     self, v: datetime | None, _info: FieldSerializationInfo
+    # ) -> str | None:
+    #     return timezones.format_vn_time(v)
+
     @field_serializer("expires_at")
     def serialize_expires_at(
         self, v: datetime | None, _info: FieldSerializationInfo
     ) -> str | None:
         return timezones.format_vn_time(v)
+
+    # ✨ FIX: Đặt validator xử lý input vào class cơ sở (base class)
+    @field_validator("expires_at", mode="before")
+    @classmethod
+    def parse_custom_datetime(cls, v: datetime | None) -> datetime | None:
+        """
+        Validator này xử lý việc chuyển đổi chuỗi 'dd-mm-YYYY H:M:S' thành
+        một đối tượng datetime offset-aware theo múi giờ Việt Nam.
+        """
+        if isinstance(v, str):
+            try:
+                # 1. Parse chuỗi thành một datetime NAIVE
+                naive_dt = datetime.strptime(v, "%d-%m-%Y %H:%M:%S")
+                # 2. ✨ FIX: Gán múi giờ Việt Nam để biến nó thành AWARE
+                return naive_dt.replace(tzinfo=VN_TZ)
+            except ValueError:
+                # Nếu thất bại, Pydantic sẽ tiếp tục xử lý các định dạng chuẩn khác
+                pass
+        return v
 
     @field_validator("options")
     @classmethod
