@@ -1,7 +1,9 @@
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from app.models.Polls import Poll, PollCreate
 from app.services import utils
@@ -26,11 +28,29 @@ def get_poll(poll_id: UUID) -> Poll:
     return poll
 
 
+class PollStatus(Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    ALL = "all"
+
+
+class PollsListResponse(BaseModel):
+    count: int
+    polls: list[Poll]
+
+
 @router.get("/")
-def get_polls() -> list[Poll]:
+def get_polls(status: PollStatus = PollStatus.ACTIVE) -> PollsListResponse:
     polls = utils.get_all_polls()
 
     if not polls:
         raise HTTPException(status_code=404, detail="No polls were found")
 
-    return polls
+    if status == PollStatus.ACTIVE:
+        filtered_polls = [poll for poll in polls if poll.is_active()]
+    elif status == PollStatus.EXPIRED:
+        filtered_polls = [poll for poll in polls if not poll.is_active()]
+    else:  # PollStatus.ALL
+        filtered_polls = polls
+
+    return PollsListResponse(count=len(filtered_polls), polls=filtered_polls)
