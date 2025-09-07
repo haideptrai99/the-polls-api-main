@@ -73,4 +73,4 @@ class Message(BaseModel):
     description="mô tả hàm",
 )
 def read_root() -> Message:
-    return Message(message="Hello, World! deploy now")
+    return Message(message="Hello frontend")
